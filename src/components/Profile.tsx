@@ -16,7 +16,7 @@ const periods = [
   { title: '1ヶ月', statsKey: 'oneMonthStats' },
   { title: '3ヶ月', statsKey: 'threeMonthsStats' },
   { title: '6ヶ月', statsKey: 'sixMonthsStats' },
-  { title: '1年', statsKey: 'oneYearStats' }
+  { title: '12ヶ月', statsKey: 'oneYearStats' }
 ];
 
 export default function Profile({ profile, userId, onUpdate, stats, tradeData }: ProfileProps) {
@@ -128,42 +128,44 @@ export default function Profile({ profile, userId, onUpdate, stats, tradeData }:
         <h3 className="text-lg font-medium text-gray-900 mb-4 pb-2 border-b">
           トレード実績
         </h3>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="py-2 px-4 text-left font-medium text-gray-500">期間</th>
-                <th className="py-2 px-4 text-right font-medium text-gray-500">取引日数</th>
-                <th className="py-2 px-4 text-right font-medium text-gray-500">勝率</th>
-                <th className="py-2 px-4 text-right font-medium text-gray-500">損益</th>
-                <th className="py-2 px-4 text-right font-medium text-gray-500">遵守率</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visiblePeriods.map(({ title, statsKey }) => {
-                const periodStats = stats[statsKey];
-                return (
-                  <tr key={title} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium">{title}</td>
-                    <td className="py-3 px-4 text-right">
-                      {periodStats.tradingDays}日
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      {Math.round(periodStats.winRate)}%
-                    </td>
-                    <td className={`py-3 px-4 text-right ${
-                      periodStats.totalPnL >= 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {periodStats.totalPnL.toLocaleString()}円
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      {Math.round(periodStats.ruleAdherence)}%
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="overflow-x-auto -mx-6">
+          <div className="inline-block min-w-full align-middle px-6">
+            <table className="min-w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="py-2 px-4 text-left font-medium text-gray-500">期間</th>
+                  <th className="py-2 px-4 text-right font-medium text-gray-500">取引日数</th>
+                  <th className="py-2 px-4 text-right font-medium text-gray-500">勝率</th>
+                  <th className="py-2 px-4 text-right font-medium text-gray-500">損益</th>
+                  <th className="py-2 px-4 text-right font-medium text-gray-500">遵守率</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visiblePeriods.map(({ title, statsKey }) => {
+                  const periodStats = stats[statsKey];
+                  return (
+                    <tr key={title} className="border-b hover:bg-gray-50">
+                      <td className="py-3 px-4 font-medium">{title}</td>
+                      <td className="py-3 px-4 text-right">
+                        {periodStats.tradingDays}日
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {Math.round(periodStats.winRate)}%
+                      </td>
+                      <td className={`py-3 px-4 text-right ${
+                        periodStats.totalPnL >= 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {periodStats.totalPnL.toLocaleString()}円
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {Math.round(periodStats.ruleAdherence)}%
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 

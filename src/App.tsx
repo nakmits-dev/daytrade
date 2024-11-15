@@ -36,14 +36,22 @@ export default function App() {
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      setUser(user);
       if (user) {
+        if (!user.emailVerified) {
+          await auth.signOut();
+          setUser(null);
+          setProfile(null);
+          setInitialLoading(false);
+          return;
+        }
+        setUser(user);
         const jstDate = getJSTDate(selectedDate);
         await Promise.all([
           loadTradeData(user.uid, jstDate.getUTCFullYear(), jstDate.getUTCMonth() + 1),
           loadUserProfile(user.uid)
         ]);
       } else {
+        setUser(null);
         setTradeData({});
         setProfile(null);
       }
@@ -58,13 +66,11 @@ export default function App() {
       const monthlyData = await fetchTradeData(userId, year, month);
       setTradeData(monthlyData);
 
-      // プロフィール表示時は年間データも取得
       if (showProfile) {
         const yearlyData = await fetchTradeData(userId, year, undefined, true);
         setYearlyTradeData(yearlyData);
       }
 
-      // 統計データの更新
       const allData = { ...monthlyData, ...yearlyTradeData };
       const newStats = calculateTradeStats(allData);
       setStats(newStats);
@@ -76,9 +82,18 @@ export default function App() {
   const loadUserProfile = async (userId: string) => {
     try {
       const userProfile = await fetchUserProfile(userId);
-      setProfile(userProfile);
+      if (userProfile) {
+        setProfile(userProfile);
+      } else {
+        await auth.signOut();
+        setUser(null);
+        setProfile(null);
+      }
     } catch (error) {
       console.error('プロフィール読み込みエラー:', error);
+      await auth.signOut();
+      setUser(null);
+      setProfile(null);
     }
   };
 
@@ -103,7 +118,6 @@ export default function App() {
   const handleProfileToggle = () => {
     setShowProfile(!showProfile);
     if (!showProfile && user) {
-      // プロフィール表示時に年間データを取得
       const jstDate = getJSTDate(selectedDate);
       loadTradeData(user.uid, jstDate.getUTCFullYear(), undefined, true);
     }
@@ -137,7 +151,7 @@ export default function App() {
         onProfileClick={handleProfileToggle}
       />
       
-      <main className="p-6">
+      <main className="p-4 sm:p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           {showProfile ? (
             <Profile
