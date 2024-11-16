@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserProfile } from '../lib/db';
+import { UserProfile, saveUserProfile } from '../lib/db';
 import { TradeStats, TradeDataStore } from '../lib/types';
 import YearlyPnLChart from './YearlyPnLChart';
 import { User, Edit3 } from 'lucide-react';
@@ -22,7 +22,7 @@ const periods = [
 export default function Profile({ profile, userId, onUpdate, stats, tradeData }: ProfileProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(profile.name);
-  const [bio, setBio] = useState(profile.bio);
+  const [bio, setBio] = useState(profile.bio || '');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,7 +35,7 @@ export default function Profile({ profile, userId, onUpdate, stats, tradeData }:
         bio,
         updatedAt: new Date().toISOString()
       });
-      onUpdate();
+      await onUpdate();
       setIsEditing(false);
     } catch (error) {
       console.error('プロフィール更新エラー:', error);
@@ -47,11 +47,11 @@ export default function Profile({ profile, userId, onUpdate, stats, tradeData }:
   // 表示する期間を決定（少なくとも1ヶ月は表示）
   const visiblePeriods = periods.filter(({ statsKey }) => {
     if (statsKey === 'oneMonthStats') return true;
-    return stats[statsKey].tradingDays > 0;
+    return stats[statsKey as keyof TradeStats].tradingDays > 0;
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl shadow-lg overflow-hidden">
         {!isEditing ? (
           <div className="relative">
@@ -64,12 +64,12 @@ export default function Profile({ profile, userId, onUpdate, stats, tradeData }:
                 <Edit3 className="w-5 h-5 text-white" />
               </button>
             </div>
-            <div className="p-8">
+            <div className="p-6 sm:p-8">
               <div className="flex items-center gap-4 mb-6">
                 <div className="p-3 bg-white/10 rounded-full">
-                  <User className="w-8 h-8 text-white" />
+                  <User className="w-6 sm:w-8 h-6 sm:h-8 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-white">{profile.name}</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-white">{profile.name}</h2>
               </div>
               <div className="text-white/90 whitespace-pre-line text-sm leading-relaxed">
                 {profile.bio || '自己紹介が未設定です'}
@@ -77,7 +77,7 @@ export default function Profile({ profile, userId, onUpdate, stats, tradeData }:
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-8 space-y-6">
+          <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
             <div>
               <label className="block text-sm font-medium text-white/90 mb-2">
                 名前
@@ -124,40 +124,40 @@ export default function Profile({ profile, userId, onUpdate, stats, tradeData }:
         )}
       </div>
 
-      <div className="bg-white rounded-xl shadow-lg p-6">
+      <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4 pb-2 border-b">
           トレード実績
         </h3>
-        <div className="overflow-x-auto -mx-6">
-          <div className="inline-block min-w-full align-middle px-6">
+        <div className="overflow-x-auto -mx-4 sm:-mx-6">
+          <div className="inline-block min-w-full align-middle px-4 sm:px-6">
             <table className="min-w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="py-2 px-4 text-left font-medium text-gray-500">期間</th>
-                  <th className="py-2 px-4 text-right font-medium text-gray-500">取引日数</th>
-                  <th className="py-2 px-4 text-right font-medium text-gray-500">勝率</th>
-                  <th className="py-2 px-4 text-right font-medium text-gray-500">損益</th>
-                  <th className="py-2 px-4 text-right font-medium text-gray-500">遵守率</th>
+                  <th className="py-2 px-2 sm:px-4 text-left text-xs sm:text-sm font-medium text-gray-500">期間</th>
+                  <th className="py-2 px-2 sm:px-4 text-right text-xs sm:text-sm font-medium text-gray-500">取引日数</th>
+                  <th className="py-2 px-2 sm:px-4 text-right text-xs sm:text-sm font-medium text-gray-500">勝率</th>
+                  <th className="py-2 px-2 sm:px-4 text-right text-xs sm:text-sm font-medium text-gray-500">損益</th>
+                  <th className="py-2 px-2 sm:px-4 text-right text-xs sm:text-sm font-medium text-gray-500">遵守率</th>
                 </tr>
               </thead>
               <tbody>
                 {visiblePeriods.map(({ title, statsKey }) => {
-                  const periodStats = stats[statsKey];
+                  const periodStats = stats[statsKey as keyof TradeStats];
                   return (
                     <tr key={title} className="border-b hover:bg-gray-50">
-                      <td className="py-3 px-4 font-medium">{title}</td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3 px-2 sm:px-4 text-xs sm:text-sm font-medium">{title}</td>
+                      <td className="py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
                         {periodStats.tradingDays}日
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
                         {Math.round(periodStats.winRate)}%
                       </td>
-                      <td className={`py-3 px-4 text-right ${
+                      <td className={`py-3 px-2 sm:px-4 text-xs sm:text-sm text-right ${
                         periodStats.totalPnL >= 0 ? 'text-green-600' : 'text-red-600'
                       }`}>
                         {periodStats.totalPnL.toLocaleString()}円
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3 px-2 sm:px-4 text-xs sm:text-sm text-right">
                         {Math.round(periodStats.ruleAdherence)}%
                       </td>
                     </tr>
