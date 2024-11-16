@@ -9,7 +9,7 @@ interface TradeFormProps {
   selectedDate: Date;
   onSave: (data: { pnl: number; rulesFollowed: TradeRule[]; memo?: string; } | null) => void;
   tradeData: { [date: string]: { pnl: number; rulesFollowed: TradeRule[]; memo?: string; } };
-  userId: string; // Add userId prop
+  userId: string;
 }
 
 export default function TradeForm({ selectedDate, onSave, tradeData, userId }: TradeFormProps) {
@@ -24,12 +24,10 @@ export default function TradeForm({ selectedDate, onSave, tradeData, userId }: T
     const dateString = getJSTDateString(selectedDate);
     const dayData = tradeData[dateString];
 
-    // 選択された日付のデータが存在する場合はそのルールを使用
     if (dayData?.rulesFollowed) {
       return dayData.rulesFollowed;
     }
 
-    // 存在しない場合は、直前の取引日のルールを使用
     const currentDateString = getJSTDateString(selectedDate);
     const prevDayData = Object.entries(tradeData)
       .filter(([date]) => date < currentDateString)
@@ -42,7 +40,6 @@ export default function TradeForm({ selectedDate, onSave, tradeData, userId }: T
       }));
     }
 
-    // どちらも存在しない場合は新しいルールを作成
     return [createNewRule()];
   };
 
@@ -136,10 +133,7 @@ export default function TradeForm({ selectedDate, onSave, tradeData, userId }: T
         memo: memo.trim() || undefined,
       };
 
-      // DBに保存
       await saveTradeEntry(userId, dateString, saveData);
-      
-      // 親コンポーネントに通知
       await onSave(saveData);
       
       setIsEditing(true);
@@ -161,17 +155,13 @@ export default function TradeForm({ selectedDate, onSave, tradeData, userId }: T
     try {
       const dateString = getJSTDateString(selectedDate);
       
-      // DBから削除
       await saveTradeEntry(userId, dateString, null);
-      
-      // 親コンポーネントに通知
       await onSave(null);
       
       setPnl('');
       setMemo('');
       setIsEditing(false);
       
-      // 直前の取引日のルールを読み込む
       const initialRules = loadInitialRules();
       setRules(initialRules);
     } catch (error) {
@@ -238,11 +228,11 @@ export default function TradeForm({ selectedDate, onSave, tradeData, userId }: T
               </button>
             )}
           </div>
-          <div className="space-y-0">
+          <div className="space-y-1">
             {rules.map((rule, index) => (
               <div
                 key={index}
-                className="flex items-center gap-2 py-0.5 px-2 rounded-lg hover:bg-gray-50"
+                className="flex items-center gap-2 py-1.5 px-2 rounded-lg bg-gray-50"
               >
                 <div className="flex-1">
                   <input
@@ -250,17 +240,18 @@ export default function TradeForm({ selectedDate, onSave, tradeData, userId }: T
                     value={rule.name}
                     onChange={(e) => handleUpdateRuleName(index, e.target.value)}
                     disabled={isSaving}
-                    className="w-full bg-transparent px-2 py-0.5 text-xs rounded focus:outline-none focus:ring-1 focus:ring-indigo-200 disabled:opacity-50"
+                    className="w-full bg-transparent px-2 py-1 text-sm rounded border-0 focus:outline-none focus:ring-1 focus:ring-indigo-200 disabled:opacity-50"
+                    placeholder="ルールを入力..."
                   />
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => handleRemoveRule(index)}
                     disabled={isSaving}
-                    className="p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50"
+                    className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
                   <button
                     type="button"
@@ -290,7 +281,7 @@ export default function TradeForm({ selectedDate, onSave, tradeData, userId }: T
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
             disabled={isSaving}
-            className="w-full h-24 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-[13px] disabled:opacity-50"
+            className="w-full h-24 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200 text-sm disabled:opacity-50"
             placeholder="今日の取引メモ..."
           />
         </div>
