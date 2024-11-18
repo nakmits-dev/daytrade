@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://daytrade-journal.netlify.app/sitemap.xml
