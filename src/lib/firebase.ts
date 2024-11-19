@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// Ensure all environment variables are present
+// Firebase設定の検証
 const requiredEnvVars = [
   'VITE_FIREBASE_API_KEY',
   'VITE_FIREBASE_AUTH_DOMAIN',
@@ -10,14 +10,15 @@ const requiredEnvVars = [
   'VITE_FIREBASE_STORAGE_BUCKET',
   'VITE_FIREBASE_MESSAGING_SENDER_ID',
   'VITE_FIREBASE_APP_ID'
-];
+] as const;
 
-const missingEnvVars = requiredEnvVars.filter(varName => !import.meta.env[varName]);
+const missingVars = requiredEnvVars.filter(key => !import.meta.env[key]);
 
-if (missingEnvVars.length > 0) {
-  throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+if (missingVars.length > 0) {
+  throw new Error(`必要な環境変数が設定されていません: ${missingVars.join(', ')}`);
 }
 
+// Firebase設定
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -27,6 +28,13 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-const app = initializeApp(firebaseConfig);
+let app;
+try {
+  app = initializeApp(firebaseConfig);
+} catch (error) {
+  console.error('Firebase初期化エラー:', error);
+  throw error;
+}
+
 export const auth = getAuth(app);
 export const db = getFirestore(app);
