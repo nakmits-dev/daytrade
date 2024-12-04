@@ -63,15 +63,26 @@ export default function App() {
 
   const loadTradeData = async (userId: string, year?: number, month?: number) => {
     try {
+      // 現在の月のデータを取得
       const monthlyData = await fetchTradeData(userId, year, month);
-      setTradeData(monthlyData);
+      
+      // 前月のデータも取得
+      const prevDate = new Date(Date.UTC(year || 0, (month || 1) - 2, 1));
+      const prevMonthData = await fetchTradeData(
+        userId,
+        prevDate.getUTCFullYear(),
+        prevDate.getUTCMonth() + 1
+      );
+
+      // データをマージ
+      setTradeData({ ...prevMonthData, ...monthlyData });
 
       if (showProfile) {
         const yearlyData = await fetchTradeData(userId, year, undefined, true);
         setYearlyTradeData(yearlyData);
       }
 
-      const allData = { ...monthlyData, ...yearlyTradeData };
+      const allData = { ...prevMonthData, ...monthlyData, ...yearlyTradeData };
       const newStats = calculateTradeStats(allData);
       setStats(newStats);
     } catch (error) {
