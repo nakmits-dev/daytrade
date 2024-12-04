@@ -28,13 +28,14 @@ export default function TradeForm({ selectedDate, onSave, tradeData, userId }: T
       return dayData.rulesFollowed;
     }
 
-    const currentDateString = getJSTDateString(selectedDate);
-    const prevDayData = Object.entries(tradeData)
-      .filter(([date]) => date < currentDateString)
-      .sort(([a], [b]) => b.localeCompare(a))[0];
-    
-    if (prevDayData && prevDayData[1]?.rulesFollowed) {
-      return prevDayData[1].rulesFollowed.map(rule => ({
+    // 日付でソートして直近の取引ルールを取得（先月のデータも含む）
+    const sortedEntries = Object.entries(tradeData)
+      .filter(([date]) => date < dateString)
+      .sort(([a], [b]) => b.localeCompare(a));
+
+    const lastEntry = sortedEntries[0];
+    if (lastEntry && lastEntry[1]?.rulesFollowed) {
+      return lastEntry[1].rulesFollowed.map(rule => ({
         ...rule,
         followed: true
       }));
