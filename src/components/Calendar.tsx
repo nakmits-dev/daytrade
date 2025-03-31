@@ -74,17 +74,15 @@ export default function Calendar({ selectedDate, onDateSelect, tradeData, onMont
           </div>
         ))}
         
-        {Array.from({ length: 35 }, (_, i) => {
+        {Array.from({ length: 42 }, (_, i) => {
           const dayNumber = i - firstDayOfMonth + 1;
           const isCurrentMonth = dayNumber > 0 && dayNumber <= daysInMonth;
           const date = new Date(Date.UTC(jstDate.getUTCFullYear(), jstDate.getUTCMonth(), dayNumber));
           const dayData = isCurrentMonth ? getDayData(date) : undefined;
           const dayOfWeek = date.getUTCDay();
           const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-          const isSelected = 
-            jstDate.getUTCDate() === dayNumber && 
-            jstDate.getUTCMonth() === date.getUTCMonth() &&
-            jstDate.getUTCFullYear() === date.getUTCFullYear();
+          const isSelected = isCurrentMonth && 
+            getJSTDateString(date) === getJSTDateString(selectedDate);
 
           if (isWeekend) return null;
 

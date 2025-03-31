@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { UserProfile, saveUserProfile } from '../lib/db';
 import { TradeStats, TradeDataStore } from '../lib/types';
 import YearlyPnLChart from './YearlyPnLChart';
-import { User, Edit3 } from 'lucide-react';
+import { User, Edit3, ArrowLeft } from 'lucide-react';
 
 interface ProfileProps {
   profile: UserProfile;
@@ -10,16 +10,10 @@ interface ProfileProps {
   onUpdate: () => void;
   stats: TradeStats;
   tradeData: TradeDataStore;
+  onBack: () => void;
 }
 
-const periods = [
-  { title: '1ヶ月', statsKey: 'oneMonthStats' },
-  { title: '3ヶ月', statsKey: 'threeMonthsStats' },
-  { title: '6ヶ月', statsKey: 'sixMonthsStats' },
-  { title: '12ヶ月', statsKey: 'oneYearStats' }
-];
-
-export default function Profile({ profile, userId, onUpdate, stats, tradeData }: ProfileProps) {
+export default function Profile({ profile, userId, onUpdate, stats, tradeData, onBack }: ProfileProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(profile.name);
   const [bio, setBio] = useState(profile.bio || '');
@@ -52,6 +46,14 @@ export default function Profile({ profile, userId, onUpdate, stats, tradeData }:
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      <button
+        onClick={onBack}
+        className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        <span>カレンダーに戻る</span>
+      </button>
+
       <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl shadow-lg overflow-hidden">
         {!isEditing ? (
           <div className="relative">
@@ -173,3 +175,10 @@ export default function Profile({ profile, userId, onUpdate, stats, tradeData }:
     </div>
   );
 }
+
+const periods = [
+  { title: '1ヶ月', statsKey: 'oneMonthStats' },
+  { title: '3ヶ月', statsKey: 'threeMonthsStats' },
+  { title: '6ヶ月', statsKey: 'sixMonthsStats' },
+  { title: '12ヶ月', statsKey: 'oneYearStats' }
+];

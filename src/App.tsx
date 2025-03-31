@@ -171,6 +171,7 @@ export default function App() {
               onUpdate={() => loadUserProfile(user.uid)}
               stats={stats}
               tradeData={{ ...tradeData, ...yearlyTradeData }}
+              onBack={() => setShowProfile(false)}
             />
           ) : (
             <>
