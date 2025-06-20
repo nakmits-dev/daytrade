@@ -21,6 +21,21 @@ const initialStats: TradeStats = {
   accountSize: 1000000
 };
 
+// その月の最初の月曜日を取得する関数
+function getFirstMondayOfMonth(year: number, month: number): Date {
+  // 月の最初の日を取得（月は0ベース）
+  const firstDay = new Date(Date.UTC(year, month, 1));
+  const dayOfWeek = firstDay.getUTCDay(); // 0=日曜日, 1=月曜日, ...
+  
+  // 月曜日までの日数を計算
+  const daysToMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek) % 7;
+  
+  // 最初の月曜日の日付を計算
+  const firstMonday = new Date(Date.UTC(year, month, 1 + daysToMonday));
+  
+  return firstMonday;
+}
+
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -28,7 +43,9 @@ export default function App() {
   const [yearlyTradeData, setYearlyTradeData] = useState<{ [key: string]: any }>({});
   const [selectedDate, setSelectedDate] = useState(() => {
     const now = new Date();
-    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const currentYear = now.getUTCFullYear();
+    const currentMonth = now.getUTCMonth();
+    return getFirstMondayOfMonth(currentYear, currentMonth);
   });
   const [initialLoading, setInitialLoading] = useState(true);
   const [showProfile, setShowProfile] = useState(false);
@@ -117,6 +134,10 @@ export default function App() {
   };
 
   const handleMonthChange = (year: number, month: number) => {
+    // 月が変更された時は、その月の最初の月曜日を選択
+    const firstMonday = getFirstMondayOfMonth(year, month - 1); // monthは1ベースで渡されるので-1
+    setSelectedDate(firstMonday);
+    
     if (user) {
       loadTradeData(user.uid, year, month);
     }

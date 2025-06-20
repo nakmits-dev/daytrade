@@ -11,6 +11,15 @@ interface CalendarProps {
   onMonthChange?: (year: number, month: number) => void;
 }
 
+// その月の最初の月曜日を取得する関数
+function getFirstMondayOfMonth(year: number, month: number): Date {
+  const firstDay = new Date(Date.UTC(year, month, 1));
+  const dayOfWeek = firstDay.getUTCDay();
+  const daysToMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek) % 7;
+  const firstMonday = new Date(Date.UTC(year, month, 1 + daysToMonday));
+  return firstMonday;
+}
+
 export default function Calendar({ selectedDate, onDateSelect, tradeData, onMonthChange }: CalendarProps) {
   const jstDate = getJSTDate(selectedDate);
 
@@ -23,20 +32,28 @@ export default function Calendar({ selectedDate, onDateSelect, tradeData, onMont
   ).getUTCDate();
 
   const handlePrevMonth = () => {
-    const newDate = new Date(Date.UTC(jstDate.getUTCFullYear(), jstDate.getUTCMonth() - 1, 1));
-    onDateSelect(newDate);
+    const prevYear = jstDate.getUTCMonth() === 0 ? jstDate.getUTCFullYear() - 1 : jstDate.getUTCFullYear();
+    const prevMonth = jstDate.getUTCMonth() === 0 ? 11 : jstDate.getUTCMonth() - 1;
+    
+    // 前月の最初の月曜日を取得
+    const firstMonday = getFirstMondayOfMonth(prevYear, prevMonth);
+    onDateSelect(firstMonday);
+    
     if (onMonthChange) {
-      const jstNewDate = getJSTDate(newDate);
-      onMonthChange(jstNewDate.getUTCFullYear(), jstNewDate.getUTCMonth() + 1);
+      onMonthChange(prevYear, prevMonth + 1);
     }
   };
 
   const handleNextMonth = () => {
-    const newDate = new Date(Date.UTC(jstDate.getUTCFullYear(), jstDate.getUTCMonth() + 1, 1));
-    onDateSelect(newDate);
+    const nextYear = jstDate.getUTCMonth() === 11 ? jstDate.getUTCFullYear() + 1 : jstDate.getUTCFullYear();
+    const nextMonth = jstDate.getUTCMonth() === 11 ? 0 : jstDate.getUTCMonth() + 1;
+    
+    // 次月の最初の月曜日を取得
+    const firstMonday = getFirstMondayOfMonth(nextYear, nextMonth);
+    onDateSelect(firstMonday);
+    
     if (onMonthChange) {
-      const jstNewDate = getJSTDate(newDate);
-      onMonthChange(jstNewDate.getUTCFullYear(), jstNewDate.getUTCMonth() + 1);
+      onMonthChange(nextYear, nextMonth + 1);
     }
   };
 
