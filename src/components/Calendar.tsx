@@ -11,13 +11,22 @@ interface CalendarProps {
   onMonthChange?: (year: number, month: number) => void;
 }
 
-// その月の最初の月曜日を取得する関数
-function getFirstMondayOfMonth(year: number, month: number): Date {
+// その月の最初の平日（月〜金）を取得する関数
+function getFirstWeekdayOfMonth(year: number, month: number): Date {
   const firstDay = new Date(Date.UTC(year, month, 1));
   const dayOfWeek = firstDay.getUTCDay();
-  const daysToMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek) % 7;
-  const firstMonday = new Date(Date.UTC(year, month, 1 + daysToMonday));
-  return firstMonday;
+  
+  let daysToWeekday = 0;
+  if (dayOfWeek === 0) { // 日曜日の場合、月曜日まで1日
+    daysToWeekday = 1;
+  } else if (dayOfWeek === 6) { // 土曜日の場合、月曜日まで2日
+    daysToWeekday = 2;
+  } else { // 月〜金の場合はそのまま
+    daysToWeekday = 0;
+  }
+  
+  const firstWeekday = new Date(Date.UTC(year, month, 1 + daysToWeekday));
+  return firstWeekday;
 }
 
 export default function Calendar({ selectedDate, onDateSelect, tradeData, onMonthChange }: CalendarProps) {
@@ -35,9 +44,9 @@ export default function Calendar({ selectedDate, onDateSelect, tradeData, onMont
     const prevYear = jstDate.getUTCMonth() === 0 ? jstDate.getUTCFullYear() - 1 : jstDate.getUTCFullYear();
     const prevMonth = jstDate.getUTCMonth() === 0 ? 11 : jstDate.getUTCMonth() - 1;
     
-    // 前月の最初の月曜日を取得
-    const firstMonday = getFirstMondayOfMonth(prevYear, prevMonth);
-    onDateSelect(firstMonday);
+    // 前月の最初の平日を取得
+    const firstWeekday = getFirstWeekdayOfMonth(prevYear, prevMonth);
+    onDateSelect(firstWeekday);
     
     if (onMonthChange) {
       onMonthChange(prevYear, prevMonth + 1);
@@ -48,9 +57,9 @@ export default function Calendar({ selectedDate, onDateSelect, tradeData, onMont
     const nextYear = jstDate.getUTCMonth() === 11 ? jstDate.getUTCFullYear() + 1 : jstDate.getUTCFullYear();
     const nextMonth = jstDate.getUTCMonth() === 11 ? 0 : jstDate.getUTCMonth() + 1;
     
-    // 次月の最初の月曜日を取得
-    const firstMonday = getFirstMondayOfMonth(nextYear, nextMonth);
-    onDateSelect(firstMonday);
+    // 次月の最初の平日を取得
+    const firstWeekday = getFirstWeekdayOfMonth(nextYear, nextMonth);
+    onDateSelect(firstWeekday);
     
     if (onMonthChange) {
       onMonthChange(nextYear, nextMonth + 1);

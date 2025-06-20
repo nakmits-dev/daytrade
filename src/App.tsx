@@ -21,19 +21,26 @@ const initialStats: TradeStats = {
   accountSize: 1000000
 };
 
-// その月の最初の月曜日を取得する関数
-function getFirstMondayOfMonth(year: number, month: number): Date {
+// その月の最初の平日（月〜金）を取得する関数
+function getFirstWeekdayOfMonth(year: number, month: number): Date {
   // 月の最初の日を取得（月は0ベース）
   const firstDay = new Date(Date.UTC(year, month, 1));
-  const dayOfWeek = firstDay.getUTCDay(); // 0=日曜日, 1=月曜日, ...
+  const dayOfWeek = firstDay.getUTCDay(); // 0=日曜日, 1=月曜日, ..., 6=土曜日
   
-  // 月曜日までの日数を計算
-  const daysToMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek) % 7;
+  // 平日（月〜金）までの日数を計算
+  let daysToWeekday = 0;
+  if (dayOfWeek === 0) { // 日曜日の場合、月曜日まで1日
+    daysToWeekday = 1;
+  } else if (dayOfWeek === 6) { // 土曜日の場合、月曜日まで2日
+    daysToWeekday = 2;
+  } else { // 月〜金の場合はそのまま
+    daysToWeekday = 0;
+  }
   
-  // 最初の月曜日の日付を計算
-  const firstMonday = new Date(Date.UTC(year, month, 1 + daysToMonday));
+  // 最初の平日の日付を計算
+  const firstWeekday = new Date(Date.UTC(year, month, 1 + daysToWeekday));
   
-  return firstMonday;
+  return firstWeekday;
 }
 
 export default function App() {
@@ -45,7 +52,7 @@ export default function App() {
     const now = new Date();
     const currentYear = now.getUTCFullYear();
     const currentMonth = now.getUTCMonth();
-    return getFirstMondayOfMonth(currentYear, currentMonth);
+    return getFirstWeekdayOfMonth(currentYear, currentMonth);
   });
   const [initialLoading, setInitialLoading] = useState(true);
   const [showProfile, setShowProfile] = useState(false);
@@ -134,9 +141,9 @@ export default function App() {
   };
 
   const handleMonthChange = (year: number, month: number) => {
-    // 月が変更された時は、その月の最初の月曜日を選択
-    const firstMonday = getFirstMondayOfMonth(year, month - 1); // monthは1ベースで渡されるので-1
-    setSelectedDate(firstMonday);
+    // 月が変更された時は、その月の最初の平日を選択
+    const firstWeekday = getFirstWeekdayOfMonth(year, month - 1); // monthは1ベースで渡されるので-1
+    setSelectedDate(firstWeekday);
     
     if (user) {
       loadTradeData(user.uid, year, month);
